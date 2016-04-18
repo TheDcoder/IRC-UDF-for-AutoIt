@@ -42,7 +42,6 @@
 ; _IRC_SetMode
 ; _IRC_SetNick
 ; _IRC_SetUser
-; _IRC_WaitForMsg
 ; _IRC_WaitForNextMsg
 ; ===============================================================================================================================
 
@@ -95,16 +94,16 @@ TCPStartup() ; Start TCP Services
 ; ===============================================================================================================================
 Func _IRC_AuthPlainSASL($iSocket, $sUsername, $sPassword)
 	If Not _IRC_CapRequire($iSocket, 'multi-prefix sasl') Then Return SetError(6, 0, False)
-	If @error Then SetError(2, @extended, False)
+	If @error Then Return SetError(2, @extended, False)
 	_IRC_SendRaw($iSocket, "AUTHENTICATE PLAIN")
-	If @error Then SetError(5, @extended, False)
-	_IRC_WaitForMsg($iSocket, '+')
-	If @error Then SetError(3, @extended, False)
+	If @error Then Return SetError(5, @extended, False)
+	If Not _IRC_WaitForNextMsg($iSocket, True)[$IRC_MSGFORMAT_COMMAND] = "AUTHENTICATE" Then Return SetError(3, @extended, False)
+	;If @error Then SetError(3, @extended, False)
 	_IRC_SendRaw($iSocket, "AUTHENTICATE " & StringReplace(__IRC_Base64_Encode($sUsername & Chr(0) & $sUsername & Chr(0) & $sPassword), @CRLF, ''))
-	If @error Then SetError(5, @error, @extended)
+	If @error Then Return SetError(5, @error, @extended)
 	Local $aMessage = _IRC_WaitForNextMsg($iSocket, True)
-	If @error Then SetError(4, @extended, False)
-	If Not ($aMessage[2] = $IRC_SASL_LOGGEDIN Or $aMessage[2] = $IRC_SASL_SASLSUCCESS) Then Return SetError(1, $aMessage[2], False)
+	If @error Then Return SetError(4, @extended, False)
+	If Not ($aMessage[$IRC_MSGFORMAT_COMMAND] = $IRC_SASL_LOGGEDIN Or $aMessage[$IRC_MSGFORMAT_COMMAND] = $IRC_SASL_SASLSUCCESS) Then Return SetError(1, $aMessage[$IRC_MSGFORMAT_COMMAND], False)
 	_IRC_CapEnd($iSocket)
 	Return True
 EndFunc
@@ -127,9 +126,13 @@ EndFunc
 Func _IRC_CapRequire($iSocket, $sCapability)
 	_IRC_SendRaw($iSocket, 'CAP REQ :' & $sCapability)
 	If @error Then Return SetError(1, @extended, False)
-	Local $sMessage = _IRC_WaitForMsg($iSocket, "CAP")
+	Local $aMessage
+	Do
+		$aMessage = _IRC_WaitForNextMsg($iSocket, True)
+	Until $aMessage[$IRC_MSGFORMAT_COMMAND] = "CAP"
 	If @error Then Return SetError(2, @extended, False)
-	Return StringSplit($sMessage, ' ')[4] = "ACK"
+	_ArrayDisplay($aMessage)
+	Return $aMessage[3] = "ACK"
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
@@ -203,7 +206,7 @@ EndFunc
 ; Syntax ........: _IRC_FormatMessage($sMessage)
 ; Parameters ....: $sMessage            - The raw $sMessage from the server.
 ; Return values .: Success: Formatted Array, See Remarks for format.
-;                  Failure: False & @error is set to 1.
+;                  Failure: Not gonna happen lol.
 ; Author ........: Damon Harris (TheDcoder)
 ; Modified ......:
 ; Remarks .......: Format of the returned array:
@@ -218,7 +221,6 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_FormatMessage($sMessage)
 	Local $aMessage = StringSplit($sMessage, ' ')
-	If $aMessage[0] < 3 Then Return SetError(1, 0, False)
 	Local $iStart = 2
 	Local $aPrefixArray[2]
 	If StringLeft($aMessage[1], 1) = $IRC_TRAILING_PARAMETER_INDICATOR Then
@@ -373,7 +375,6 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_JoinChannel($iSocket, $sChannel, $sPassword = "")
 	Local $sRawMessage = "JOIN " & $sChannel & (($sPassword = "") ? ("") : (' :' & $sPassword))
-	;If Not $sPassword = "" Then $sRawMessage &= ' ' & $sPassword
 	_IRC_SendRaw($iSocket, $sRawMessage)
 	If @error Then Return SetError(@error, @extended, False)
 	Return True
@@ -632,61 +633,28 @@ Func _IRC_SetUser($iSocket, $sUsername, $sRealname, $sMode = '0', $sUnused = '*'
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
-; Name ..........: _IRC_WaitForMsg
-; Description ...: Wait for a message.
-; Syntax ........: _IRC_WaitForMsg($iSocket, $sMessage[, $iTimeout = 0])
-; Parameters ....: $iSocket             - $iSocket from _IRC_Connect.
-;                  $sMessage            - $sMessage to search for (See Remarks).
-;                  $iTimeout            - [optional] $iTimeout in milliseconds. Default is 0 (No $iTimeout).
-; Return values .: Success: The full $sMessage & @extended is set to the position of the partial $sMessage
-;                  Failure: Empty string & @error is set to:
-;                           1 - If an error occured while getting the message, @extended is set to TCPRecv's @error
-;                           2 - $iTimeout reached
-; Author ........: Damon Harris (TheDcoder)
-; Modified ......:
-; Remarks .......: You can specify anything for $sMessage, it will search the whole message for it.
-; Related .......:
-; Link ..........:
-; Example .......: No
-; ===============================================================================================================================
-Func _IRC_WaitForMsg($iSocket, $sMessage, $iTimeout = 0)
-	Local $sCurrentMessage
-	Local $iPosition = 0
-	Local $hTimer = TimerInit()
-	Do
-		$sCurrentMessage = _IRC_ReceiveRaw($iSocket)
-		If @error Then Return SetError(1, @extended, "")
-		Sleep(10)
-		If $sCurrentMessage = "" Then ContinueLoop
-		$iPosition = StringInStr($sCurrentMessage, $sMessage)
-	Until ($iPosition > 0) Or (TimerDiff($hTimer) > $iTimeout And Not $iTimeout = 0)
-	If $iPosition = 0 Then SetError(2, 0, "")
-	Return SetExtended($iPosition, $sCurrentMessage)
-EndFunc
-
-; #FUNCTION# ====================================================================================================================
 ; Name ..........: _IRC_WaitForNextMsg
 ; Description ...: Waits until a message arrives from the IRC Server.
-; Syntax ........: _IRC_WaitForNextMsg($iSocket, $bSplit = False)
+; Syntax ........: _IRC_WaitForNextMsg($iSocket, $bFormat = False)
 ; Parameters ....: $iSocket             - $iSocket from _IRC_Connect.
-;                  $bSplit              - If True then the received message is split into an array (See Remarks).
+;                  $bFormat             - If True then the received message is formatted using _IRC_FormatMessage.
 ; Return values .: Success: The message received.
 ;                  Failure: Empty string & @extended is set to TCPRecv's @error
 ; Author ........: Damon Harris (TheDcoder)
 ; Modified ......:
-; Remarks .......: A space is used as a delimiter while splitting the Message.
+; Remarks .......:
 ; Related .......:
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func _IRC_WaitForNextMsg($iSocket, $bSplit = False)
+Func _IRC_WaitForNextMsg($iSocket, $bFormat = False)
 	Local $vMessage
 	Do
 		$vMessage = _IRC_ReceiveRaw($iSocket)
 		If @error Then SetError(1, @extended, '')
 		Sleep(10)
 	Until Not $vMessage = ''
-	If $bSplit Then $vMessage = StringSplit($vMessage, ' ')
+	If $bFormat Then $vMessage = _IRC_FormatMessage($vMessage)
 	Return $vMessage
 EndFunc
 
