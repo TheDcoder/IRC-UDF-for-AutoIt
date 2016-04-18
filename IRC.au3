@@ -324,7 +324,7 @@ Func _IRC_IsChannel($sChannel)
 
 		Case Else
 			Return False
-	EndFunc
+	EndSwitch
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
@@ -582,7 +582,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetMode($iSocket, $sNick, $sOperation, $sModes, $sParameters = "")
-	_IRC_SendRaw($iSocket, 'MODE ' & $sOperation & $sModes & (($sParameters = "") ? ("") : (' ' & $sParameters)))
+	_IRC_SendRaw($iSocket, 'MODE ' & $sNick & ' ' & $sOperation & $sModes & (($sParameters = "") ? ("") : (' ' & $sParameters)))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
