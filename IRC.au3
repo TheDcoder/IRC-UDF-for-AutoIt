@@ -15,7 +15,7 @@
 ; Author(s) ........: Damon Harris (TheDcoder)
 ; Special Thanks....: Robert C. Maehl (rcmaehl) for making his version of IRC UDF which taught me the basics of TCP and IRC :)
 ; Link .............: ...
-; Importent Links ..: IRCv3                    - http://ircv3.net
+; Important Links ..: IRCv3                    - http://ircv3.net
 ;                     RFC 2812                 - https://tools.ietf.org/html/rfc2812
 ;                     List of all IRC Numerics - http://defs.ircdocs.horse/defs/numerics.html
 ; ===============================================================================================================================
