@@ -220,7 +220,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_FormatMessage($sMessage)
-	If Not StringLeft($sMessage, 1) = $IRC_TRAILING_PARAMETER_INDICATOR Then $sMessage = ' ' & $sMessage
+	If Not (StringLeft($sMessage, 1) = $IRC_TRAILING_PARAMETER_INDICATOR) Then $sMessage = ' ' & $sMessage
 	Local $aMessage = StringSplit($sMessage, $IRC_MESSAGE_SEGMENT_SEPARATOR)
 	Local $sLastParameter = ""
 	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, 1, 2)
