@@ -219,27 +219,25 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_FormatMessage($sMessage)
+	If Not StringLeft($sMessage, 1) = $IRC_TRAILING_PARAMETER_INDICATOR Then $sMessage = ' ' & $sMessage
 	Local $aMessage = StringSplit($sMessage, ' ')
-	Local $iStart = 2
-	Local $aPrefixArray[2]
-	$aMessage[$aMessage[0]] = StringTrimRight($aMessage[$aMessage[0]], 2) ; Trim @CRLF
-	If StringLeft($aMessage[1], 1) = $IRC_TRAILING_PARAMETER_INDICATOR Then
-		$iStart = 3
-		$aPrefixArray[$IRC_MSGFORMAT_PREFIX] = StringTrimLeft($aMessage[1], 1)
-		$aPrefixArray[$IRC_MSGFORMAT_COMMAND] = $aMessage[2]
+	Local $sLastParameter = ""
+	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, 1, 2)
+	Local $iLastParameterSpaces = 0
+	Local $iMessageSpaces = $aMessage[0]
+	If $iLastParameterPos = 0 Then
+		$sLastParameter = $aMessage[$aMessage[0]]
 	Else
-		$aPrefixArray[$IRC_MSGFORMAT_PREFIX] = ""
-		$aPrefixArray[$IRC_MSGFORMAT_COMMAND] = $aMessage[1]
+		$sLastParameter = StringRight($sMessage, StringLen($sMessage) - $iLastParameterPos)
+		StringReplace($sLastParameter, ' ', "", 0, $STR_NOCASESENSEBASIC)
+		$iLastParameterSpaces = @extended
 	EndIf
-	For $i = $iStart To $aMessage[0]
-		If StringLeft($aMessage[$i], 1) = $IRC_TRAILING_PARAMETER_INDICATOR Then
-			$aMessage[$i] = StringTrimLeft(_ArrayToString($aMessage, ' ', $i, $aMessage[0]), 1)
-			If Not $i = $aMessage[0] Then _ArrayDelete($aMessage, ($i + 1) & '-' & $aMessage[0])
-			ExitLoop
-		EndIf
+	Local $aFormattedMessage[$iMessageSpaces - $iLastParameterSpaces]
+	For $i = 1 To $aMessage[0] - (1 + $iLastParameterSpaces)
+		$aFormattedMessage[$i - 1] = $aMessage[$i]
 	Next
-	_ArrayConcatenate($aPrefixArray, $aMessage, $iStart)
-	Return $aPrefixArray
+	$aFormattedMessage[$i - 1] = $sLastParameter
+	Return $aFormattedMessage
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
