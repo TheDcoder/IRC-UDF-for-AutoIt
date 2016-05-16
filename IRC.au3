@@ -57,6 +57,7 @@ Global Const $IRC_MODE_ADD = '+'
 Global Const $IRC_MODE_REMOVE = '-'
 
 Global Const $IRC_TRAILING_PARAMETER_INDICATOR = ':'
+Global Const $IRC_MESSAGE_SEGMENT_SEPARATOR = ' '
 
 Global Const $IRC_SASL_LOGGEDIN = 900
 Global Const $IRC_SASL_LOGGEDOUT = 901
@@ -95,11 +96,11 @@ TCPStartup() ; Start TCP Services
 Func _IRC_AuthPlainSASL($iSocket, $sUsername, $sPassword)
 	If Not _IRC_CapRequire($iSocket, 'multi-prefix sasl') Then Return SetError(6, 0, False)
 	If @error Then Return SetError(2, @extended, False)
-	_IRC_SendRaw($iSocket, "AUTHENTICATE PLAIN")
+	_IRC_SendRaw($iSocket, "AUTHENTICATE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & "PLAIN")
 	If @error Then Return SetError(5, @extended, False)
 	If Not _IRC_WaitForNextMsg($iSocket, True)[$IRC_MSGFORMAT_COMMAND] = "AUTHENTICATE" Then Return SetError(3, @extended, False)
 	;If @error Then SetError(3, @extended, False)
-	_IRC_SendRaw($iSocket, "AUTHENTICATE " & StringReplace(__IRC_Base64_Encode($sUsername & Chr(0) & $sUsername & Chr(0) & $sPassword), @CRLF, ''))
+	_IRC_SendRaw($iSocket, "AUTHENTICATE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & StringReplace(__IRC_Base64_Encode($sUsername & Chr(0) & $sUsername & Chr(0) & $sPassword), @CRLF, ''))
 	If @error Then Return SetError(5, @error, @extended)
 	Local $aMessage = _IRC_WaitForNextMsg($iSocket, True)
 	If @error Then Return SetError(4, @extended, False)
@@ -124,7 +125,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_CapRequire($iSocket, $sCapability)
-	_IRC_SendRaw($iSocket, 'CAP REQ :' & $sCapability)
+	_IRC_SendRaw($iSocket, "CAP" & $IRC_MESSAGE_SEGMENT_SEPARATOR & "REQ" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sCapability)
 	If @error Then Return SetError(1, @extended, False)
 	Local $aMessage
 	Do
@@ -149,7 +150,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_CapEnd($iSocket)
-	_IRC_SendRaw($iSocket, 'CAP END')
+	_IRC_SendRaw($iSocket, "CAP" & $IRC_MESSAGE_SEGMENT_SEPARATOR & "END")
 	If @error Then SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -220,7 +221,7 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_FormatMessage($sMessage)
 	If Not StringLeft($sMessage, 1) = $IRC_TRAILING_PARAMETER_INDICATOR Then $sMessage = ' ' & $sMessage
-	Local $aMessage = StringSplit($sMessage, ' ')
+	Local $aMessage = StringSplit($sMessage, $IRC_MESSAGE_SEGMENT_SEPARATOR)
 	Local $sLastParameter = ""
 	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, 1, 2)
 	Local $iLastParameterSpaces = 0
@@ -229,7 +230,7 @@ Func _IRC_FormatMessage($sMessage)
 		$sLastParameter = $aMessage[$aMessage[0]]
 	Else
 		$sLastParameter = StringRight($sMessage, StringLen($sMessage) - $iLastParameterPos)
-		StringReplace($sLastParameter, ' ', "", 0, $STR_NOCASESENSEBASIC)
+		StringReplace($sLastParameter, $IRC_MESSAGE_SEGMENT_SEPARATOR, "", 0, $STR_NOCASESENSEBASIC)
 		$iLastParameterSpaces = @extended
 	EndIf
 	Local $aFormattedMessage[$iMessageSpaces - $iLastParameterSpaces]
@@ -298,7 +299,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Invite($iSocket, $sNick, $sChannel)
-	_IRC_SendRaw($iSocket, "INVITE " & $sNick & ' ' & $sChannel)
+	_IRC_SendRaw($iSocket, "INVITE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel)
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -372,7 +373,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_JoinChannel($iSocket, $sChannel, $sPassword = "")
-	Local $sRawMessage = "JOIN " & $sChannel & (($sPassword = "") ? ("") : (' :' & $sPassword))
+	Local $sRawMessage = "JOIN " & $sChannel & (($sPassword = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sPassword))
 	_IRC_SendRaw($iSocket, $sRawMessage)
 	If @error Then Return SetError(@error, @extended, False)
 	Return True
@@ -394,7 +395,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Pong($iSocket, $sServer)
-	_IRC_SendRaw($iSocket, 'PONG ' & $sServer)
+	_IRC_SendRaw($iSocket, 'PONG' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sServer)
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -417,7 +418,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Kick($iSocket, $sChannel, $sNick, $sReason = "")
-	_IRC_SendRaw($iSocket, "KICK " & $sChannel & ' ' & $sNick & (($sReason = "") ? ("") : (' :' & $sReason)))
+	_IRC_SendRaw($iSocket, "KICK" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -439,7 +440,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Part($iSocket, $sChannel, $sReason = "")
-	_IRC_SendRaw($iSocket, "PART " & $sChannel & (($sReason = "") ? ("") : (' :' & $sReason)))
+	_IRC_SendRaw($iSocket, "PART" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -460,7 +461,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Quit($iSocket, $sReason = "")
-	_IRC_SendRaw($iSocket, 'QUIT ' & (($sReason = "") ? ("") : (' :' & $sReason)))
+	_IRC_SendRaw($iSocket, 'QUIT' & $IRC_MESSAGE_SEGMENT_SEPARATOR & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -484,7 +485,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SendMessage($iSocket, $sTarget, $sMessage)
-	_IRC_SendRaw($iSocket, "PRIVMSG " & $sTarget & " :" & $sMessage)
+	_IRC_SendRaw($iSocket, "PRIVMSG" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sTarget & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sMessage)
 	If @error Then Return SetError(@error, @extended, False)
 	Return True
 EndFunc
@@ -506,7 +507,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SendNotice($iSocket, $sTarget, $sMessage)
-	_IRC_SendRaw($iSocket, "NOTICE " & $sTarget & ' :' & $sMessage)
+	_IRC_SendRaw($iSocket, "NOTICE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sTarget & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sMessage)
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -557,7 +558,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetNick($iSocket, $sNick)
-	_IRC_SendRaw($iSocket, 'NICK ' & $sNick)
+	_IRC_SendRaw($iSocket, 'NICK' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick)
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -581,7 +582,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetMode($iSocket, $sNick, $sOperation, $sModes, $sParameters = "")
-	_IRC_SendRaw($iSocket, 'MODE ' & $sNick & ' ' & $sOperation & $sModes & (($sParameters = "") ? ("") : (' ' & $sParameters)))
+	_IRC_SendRaw($iSocket, 'MODE' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sOperation & $sModes & (($sParameters = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $sParameters)))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -603,7 +604,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetTopic($iSocket, $sChannel, $sTopic)
-	_IRC_SendRaw($iSocket, 'TOPIC ' & $sChannel & ' :' & $sTopic)
+	_IRC_SendRaw($iSocket, 'TOPIC' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sTopic)
 	If @error Then Return SetError(1, @extended, False)
 EndFunc
 
@@ -626,7 +627,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetUser($iSocket, $sUsername, $sRealname, $sMode = '0', $sUnused = '*')
-	_IRC_SendRaw($iSocket, 'USER ' & $sUsername & ' ' & $sMode & ' ' & $sUnused & ' :' & $sRealname)
+	_IRC_SendRaw($iSocket, 'USER' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sUsername & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sMode & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sUnused & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sRealname)
 	If @error Then Return SetError(1, @extended, False)
 EndFunc
 
