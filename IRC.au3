@@ -351,7 +351,7 @@ Func _IRC_ReceiveRaw($iSocket)
 	Do
 		$vData &= TCPRecv($iSocket, 1)
 		If @error Then Return SetError(1, @error, False)
-	Until AscW(StringRight($vData, 2)) = $UNICODE_CR & $UNICODE_LF Or AscW(StringRight($vData, 1)) = $UNICODE_NULL
+	Until AscW(StringRight($vData, 1)) = $UNICODE_LF Or AscW(StringRight($vData, 1)) = $UNICODE_NULL
 	If Not $vData = "" Then Call($__g_IRC_sLoggingFunction, $vData, False)
 	Return $vData
 EndFunc
