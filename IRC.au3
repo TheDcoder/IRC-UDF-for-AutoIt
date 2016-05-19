@@ -37,6 +37,7 @@
 ; _IRC_Quit
 ; _IRC_ReceiveRaw
 ; _IRC_SendCTCP
+; _IRC_SendCTCPReply
 ; _IRC_SendMessage
 ; _IRC_SendNotice
 ; _IRC_SendRaw
@@ -376,6 +377,29 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_SendCTCP($iSocket, $sTarget, $sMessage)
 	_IRC_SendMessage($iSocket, $sTarget, $IRC_CTCP_DELIMITER & $sMessage & $IRC_CTCP_DELIMITER)
+	If @error Then Return SetError(@error, @extended, False)
+	Return True
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _IRC_SendCTCPReply
+; Description ...: Sends a reply to a CTCP message.
+; Syntax ........: _IRC_SendCTCPReply($iSocket, $sTarget, $sMessage, $sReply)
+; Parameters ....: $iSocket             - $iSocket from _IRC_Connect.
+;                  $sTarget             - Nickname of the $sTarget.
+;                  $sMessage            - CTCP $sMessage to which you are replying to.
+;                  $sReply              - The CTCP $sReply to send.
+; Return values .: Success: True
+;                  Failure: False & @extended set to TCPSend's @error.
+; Author ........: Damon Harris (TheDcoder)
+; Modified ......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
+; Example .......: No
+; ===============================================================================================================================
+Func _IRC_SendCTCPReply($iSocket, $sTarget, $sMessage, $sReply)
+	_IRC_SendNotice($iSocket, $sTarget, $IRC_CTCP_DELIMITER & $sMessage & ' ' & $sReply & $IRC_CTCP_DELIMITER)
 	If @error Then Return SetError(@error, @extended, False)
 	Return True
 EndFunc
