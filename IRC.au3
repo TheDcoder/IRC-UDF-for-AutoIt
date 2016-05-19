@@ -224,7 +224,11 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_FormatMessage($sMessage)
 	$sMessage = StringTrimRight($sMessage, 2) ; Trim the trailing @CRLF
-	If Not (StringLeft($sMessage, 1) = $IRC_TRAILING_PARAMETER_INDICATOR) Then $sMessage = ' ' & $sMessage
+	If Not (StringLeft($sMessage, 1) = $IRC_TRAILING_PARAMETER_INDICATOR) Then
+		$sMessage = ' ' & $sMessage
+	Else
+		$sMessage = StringTrimLeft($sMessage, 1) ; Trim $IRC_TRAILING_PARAMETER_INDICATOR
+	EndIf
 	Local $aMessage = StringSplit($sMessage, $IRC_MESSAGE_SEGMENT_SEPARATOR)
 	Local $sLastParameter = ""
 	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, 1, 2)
