@@ -36,6 +36,7 @@
 ; _IRC_Pong
 ; _IRC_Quit
 ; _IRC_ReceiveRaw
+; _IRC_SendCTCP
 ; _IRC_SendMessage
 ; _IRC_SendNotice
 ; _IRC_SendRaw
@@ -58,6 +59,7 @@ Global Const $IRC_MODE_REMOVE = '-'
 
 Global Const $IRC_TRAILING_PARAMETER_INDICATOR = ':'
 Global Const $IRC_MESSAGE_SEGMENT_SEPARATOR = ' '
+Global Const $IRC_CTCP_DELIMITER = ChrW(001)
 
 Global Const $IRC_SASL_LOGGEDIN = 900
 Global Const $IRC_SASL_LOGGEDOUT = 901
@@ -354,6 +356,28 @@ Func _IRC_ReceiveRaw($iSocket)
 	Until AscW(StringRight($vData, 1)) = $UNICODE_LF Or AscW(StringRight($vData, 1)) = $UNICODE_NULL
 	If Not $vData = "" Then Call($__g_IRC_sLoggingFunction, $vData, False)
 	Return $vData
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _IRC_SendCTCP
+; Description ...: Sends a CTCP message to the $sTarget.
+; Syntax ........: _IRC_SendCTCP($iSocket, $sTarget, $sMessage)
+; Parameters ....: $iSocket             - $iSocket from _IRC_Connect.
+;                  $sTarget             - Nickname of the $sTarget.
+;                  $sMessage            - CTCP $sMessage to send.
+; Return values .: Success: True
+;                  Failure: False, @error & @extended are set to _IRC_SendMessage's @error & @extended.
+; Author ........: Damon Harris (TheDcoder)
+; Modified ......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
+; Example .......: No
+; ===============================================================================================================================
+Func _IRC_SendCTCP($iSocket, $sTarget, $sMessage)
+	_IRC_SendMessage($iSocket, $sTarget, $IRC_CTCP_DELIMITER & $sMessage & $IRC_CTCP_DELIMITER)
+	If @error Then Return SetError(@error, @extended, False)
+	Return True
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
