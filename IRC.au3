@@ -18,6 +18,7 @@
 ; Important Links ..: IRCv3                    - http://ircv3.net
 ;                     RFC 2812                 - https://tools.ietf.org/html/rfc2812
 ;                     List of all IRC Numerics - http://defs.ircdocs.horse/defs/numerics.html
+;                     Formatting text in IRC   - http://en.wikichip.org/wiki/irc/colors
 ; ===============================================================================================================================
 
 ; #CURRENT# =====================================================================================================================
@@ -62,6 +63,7 @@ Global Const $IRC_TRAILING_PARAMETER_INDICATOR = ':'
 Global Const $IRC_MESSAGE_SEGMENT_SEPARATOR = ' '
 Global Const $IRC_CTCP_DELIMITER = ChrW(001)
 
+Global Const $IRC_FORMATTING_CHAR_BOLD = ChrW(0x02)
 Global Const $IRC_SASL_LOGGEDIN = 900
 Global Const $IRC_SASL_LOGGEDOUT = 901
 Global Const $IRC_SASL_NICKLOCKED = 902
