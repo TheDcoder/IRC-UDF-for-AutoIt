@@ -64,6 +64,30 @@ Global Const $IRC_MESSAGE_SEGMENT_SEPARATOR = ' '
 Global Const $IRC_CTCP_DELIMITER = ChrW(001)
 
 Global Const $IRC_FORMATTING_CHAR_BOLD = ChrW(0x02)
+Global Const $IRC_FORMATTING_CHAR_ITALIC = ChrW(0x1D)
+Global Const $IRC_FORMATTING_CHAR_UNDERLINE = ChrW(0x1F)
+Global Const $IRC_FORMATTING_CHAR_REVERSE = ChrW(0x16)
+Global Const $IRC_FORMATTING_CHAR_PLAIN = ChrW(0x0F)
+Global Const $IRC_FORMATTING_CHAR_COLOR = ChrW(0x03)
+
+; Below are constants for colors in IRC, Check the "Color Formatting" section in this page for more details: http://en.wikichip.org/wiki/irc/colors
+Global Const $IRC_COLOR_WHITE = 0
+Global Const $IRC_COLOR_BLACK = 1
+Global Const $IRC_COLOR_NAVY = 2
+Global Const $IRC_COLOR_GREEN = 3
+Global Const $IRC_COLOR_RED = 4
+Global Const $IRC_COLOR_MAROON = 5
+Global Const $IRC_COLOR_PURPLE = 6
+Global Const $IRC_COLOR_OLIVE = 7
+Global Const $IRC_COLOR_YELLOW = 8
+Global Const $IRC_COLOR_LIGHTGREEN = 9
+Global Const $IRC_COLOR_TEAL = 10
+Global Const $IRC_COLOR_CYAN = 11
+Global Const $IRC_COLOR_ROYALBLUE = 12
+Global Const $IRC_COLOR_MAGENTA = 13
+Global Const $IRC_COLOR_GRAY = 14
+Global Const $IRC_COLOR_LIGHTGRAY = 15
+
 Global Const $IRC_SASL_LOGGEDIN = 900
 Global Const $IRC_SASL_LOGGEDOUT = 901
 Global Const $IRC_SASL_NICKLOCKED = 902
