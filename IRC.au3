@@ -29,10 +29,12 @@
 ; _IRC_Disconnect
 ; _IRC_FormatMessage
 ; _IRC_FormatPrivMsg
+; _IRC_FormatText
 ; _IRC_Invite
 ; _IRC_IsChannel
 ; _IRC_JoinChannel
 ; _IRC_Kick
+; _IRC_MakePalette
 ; _IRC_Part
 ; _IRC_Pong
 ; _IRC_Quit
@@ -71,6 +73,7 @@ Global Const $IRC_FORMATTING_CHAR_PLAIN = ChrW(0x0F)
 Global Const $IRC_FORMATTING_CHAR_COLOR = ChrW(0x03)
 
 ; Below are constants for colors in IRC, Check the "Color Formatting" section in this page for more details: http://en.wikichip.org/wiki/irc/colors
+Global Const $IRC_COLOR_PLAIN = -1 ; Special Constant, indicates that there would be no change in color.
 Global Const $IRC_COLOR_WHITE = 0
 Global Const $IRC_COLOR_BLACK = 1
 Global Const $IRC_COLOR_NAVY = 2
@@ -87,6 +90,8 @@ Global Const $IRC_COLOR_ROYALBLUE = 12
 Global Const $IRC_COLOR_MAGENTA = 13
 Global Const $IRC_COLOR_GRAY = 14
 Global Const $IRC_COLOR_LIGHTGRAY = 15
+
+Global Enum $IRC_COLOR_PALETTE_FOREGROUND, $IRC_COLOR_PALETTE_BACKGROUND, $IRC_COLOR_PALETTE_BOLD, $IRC_COLOR_PALETTE_ITALIC, $IRC_COLOR_PALETTE_UNDERLINE
 
 Global Const $IRC_SASL_LOGGEDIN = 900
 Global Const $IRC_SASL_LOGGEDOUT = 901
@@ -317,6 +322,40 @@ Func _IRC_FormatPrivMsg($vMessage)
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
+; Name ..........: _IRC_FormatText
+; Description ...: Formats the text for IRC clients.
+; Syntax ........: _IRC_FormatText($sText, $aPalette)
+; Parameters ....: $sText               - $sText to format.
+;                  $aPalette            - $aPalette from _IRC_MakePalette.
+; Return values .: Success: Formatted $sText
+;                  Failure: Unformatted $sText & @error set to 1
+; Author ........: Damon Harris (TheDcoder)
+; Modified ......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
+; Example .......: No
+; ===============================================================================================================================
+Func _IRC_FormatText($sText, $aPalette)
+	If Not (IsArray($aPalette) Or UBound($aPalette) = 5) Then
+		Return SetError(1, 0, $sText)
+	EndIf
+	If Not ($aPalette[$IRC_COLOR_PALETTE_FOREGROUND] = $IRC_COLOR_PLAIN And $aPalette[$IRC_COLOR_PALETTE_BACKGROUND] = $IRC_COLOR_PLAIN) Then
+		If $aPalette[$IRC_COLOR_PALETTE_FOREGROUND] = $IRC_COLOR_PLAIN Then $aPalette[$IRC_COLOR_PALETTE_FOREGROUND] = ""
+		If $aPalette[$IRC_COLOR_PALETTE_BACKGROUND] = $IRC_COLOR_PLAIN Then
+			$aPalette[$IRC_COLOR_PALETTE_BACKGROUND] = ""
+		Else
+			$aPalette[$IRC_COLOR_PALETTE_BACKGROUND] = ',' & $aPalette[$IRC_COLOR_PALETTE_BACKGROUND]
+		EndIf
+		$sText = $IRC_FORMATTING_CHAR_COLOR & $aPalette[$IRC_COLOR_PALETTE_FOREGROUND] & $aPalette[$IRC_COLOR_PALETTE_BACKGROUND] & $sText
+	EndIf
+	$sText = $aPalette[$IRC_COLOR_PALETTE_BOLD] ? $IRC_FORMATTING_CHAR_BOLD & $sText : $sText
+	$sText = $aPalette[$IRC_COLOR_PALETTE_ITALIC] ? $IRC_FORMATTING_CHAR_ITALIC & $sText : $sText
+	$sText = $aPalette[$IRC_COLOR_PALETTE_UNDERLINE] ? $IRC_FORMATTING_CHAR_UNDERLINE & $sText : $sText
+	Return $sText
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
 ; Name ..........: _IRC_Invite
 ; Description ...: Invite a user to a channel
 ; Syntax ........: _IRC_Invite($iSocket, $sNick, $sChannel)
@@ -501,6 +540,34 @@ Func _IRC_Kick($iSocket, $sChannel, $sNick, $sReason = "")
 	_IRC_SendRaw($iSocket, "KICK" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _IRC_MakePalette
+; Description ...: Creates a color palette to be used with _IRC_FormatText.
+; Syntax ........: _IRC_MakePalette([$iColor = $IRC_COLOR_PLAIN[, $iBgColor = $IRC_COLOR_PLAIN[, $bBold = False[,
+;                  $bItalic = False[, $bUnderline = False]]]]])
+; Parameters ....: $iColor              - [optional] Color of the text. Default is $IRC_COLOR_PLAIN.
+;                  $iBgColor            - [optional] Background color of the text. Default is $IRC_COLOR_PLAIN.
+;                  $bBold               - [optional] Is the text Bold? Default is False.
+;                  $bItalic             - [optional] Is the text Italic? Default is False.
+;                  $bUnderline          - [optional] Is the text Underlined? Default is False.
+; Return values .: Palette Array
+; Author ........: Damon Harris (TheDcoder)
+; Modified ......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
+; Example .......: No
+; ===============================================================================================================================
+Func _IRC_MakePalette($iColor = $IRC_COLOR_PLAIN, $iBgColor = $IRC_COLOR_PLAIN, $bBold = False, $bItalic = False, $bUnderline = False)
+	Local $aPalette[5]
+	$aPalette[$IRC_COLOR_PALETTE_FOREGROUND] = $iColor
+	$aPalette[$IRC_COLOR_PALETTE_BACKGROUND] = $iBgColor
+	$aPalette[$IRC_COLOR_PALETTE_BOLD] = $bBold
+	$aPalette[$IRC_COLOR_PALETTE_ITALIC] = $bItalic
+	$aPalette[$IRC_COLOR_PALETTE_UNDERLINE] = $bUnderline
+	Return $aPalette
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
