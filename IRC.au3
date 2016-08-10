@@ -19,6 +19,7 @@
 ;                     RFC 2812                 - https://tools.ietf.org/html/rfc2812
 ;                     List of all IRC Numerics - http://defs.ircdocs.horse/defs/numerics.html
 ;                     Formatting text in IRC   - http://en.wikichip.org/wiki/irc/colors
+;                     CTCP Specs               - https://github.com/irchelp/wio/blob/gh-pages/irchelp/protocol/ctcpspec.md
 ; ===============================================================================================================================
 
 ; #CURRENT# =====================================================================================================================
