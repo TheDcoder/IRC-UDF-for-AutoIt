@@ -663,9 +663,10 @@ EndFunc
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: _IRC_SendRaw
 ; Description ...: Just a wrapper for TCPSend, use it to send raw messeges to the IRC server.
-; Syntax ........: _IRC_SendRaw($iSocket, $sRawMessage)
+; Syntax ........: _IRC_SendRaw($iSocket, $sRawMessage, $sLog = $sRawMessage)
 ; Parameters ....: $iSocket             - $iSocket from _IRC_Connect.
 ;                  $sRawMessage         - The $sRawMessage to send.
+;                  $sLog                - [optional] The message which would be logged, Default is $sRawMessage.
 ; Return values .: Success: True. @extended is set to 1 if the $sRawMessage exceeds 512 chars. (This is required by protocol.)
 ;                  Failure: False & @error set to:
 ;                           1 - If the $sRawMessage is longer than 512 bytes.
@@ -679,13 +680,13 @@ EndFunc
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func _IRC_SendRaw($iSocket, $sRawMessage)
+Func _IRC_SendRaw($iSocket, $sRawMessage, $sLog = $sRawMessage)
 	$sRawMessage &= @CRLF
 	Local $dRawMessage = StringToBinary($sRawMessage, $__g_iIRC_CharEncoding)
 	If BinaryLen($dRawMessage) > 512 Then SetError(1, 0, False)
 	TCPSend($iSocket, $dRawMessage)
 	If @error Then Return SetError(2, @error, False)
-	Call($__g_IRC_sLoggingFunction, $sRawMessage, True) ; Call the logging function
+	Call($__g_IRC_sLoggingFunction, $sLog & @CRLF, True) ; Call the logging function
 	Return True
 EndFunc
 
