@@ -115,12 +115,13 @@ TCPStartup() ; Start TCP Services
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: _IRC_AuthPlainSASL
 ; Description ...: Authenticate yourself to the server using SASL PLAIN mech.
-; Syntax ........: _IRC_AuthPlainSASL($iSocket, $sUsername, $sPassword)
+; Syntax ........: _IRC_AuthPlainSASL($iSocket, $sUsername, $sPassword, $bCensorAuthString = True)
 ; Parameters ....: $iSocket             - $iSocket from _IRC_Connect.
 ;                  $sUsername           - Your $sUsername.
 ;                  $sPassword           - Your $sPassoword.
+;                  $bCensorAuthString   - [optional] If True, the string containing the password and the username is not logged. Default is True.
 ; Return values .: Success: True
-;                  Failure: False & @error is set (refer to code.)
+;                  Failure: False & @error is set (refer to code of this function.)
 ; Author ........: Damon Harris (TheDcoder)
 ; Modified ......:
 ; Remarks .......:
@@ -128,14 +129,18 @@ TCPStartup() ; Start TCP Services
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func _IRC_AuthPlainSASL($iSocket, $sUsername, $sPassword)
+Func _IRC_AuthPlainSASL($iSocket, $sUsername, $sPassword, $bCensorAuthString = True)
 	If Not _IRC_CapRequire($iSocket, 'multi-prefix sasl') Then Return SetError(6, 0, False)
 	If @error Then Return SetError(2, @extended, False)
 	_IRC_SendRaw($iSocket, "AUTHENTICATE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & "PLAIN")
 	If @error Then Return SetError(5, @extended, False)
 	If Not _IRC_WaitForNextMsg($iSocket, True)[$IRC_MSGFORMAT_COMMAND] = "AUTHENTICATE" Then Return SetError(3, @extended, False)
 	;If @error Then SetError(3, @extended, False)
-	_IRC_SendRaw($iSocket, "AUTHENTICATE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & StringReplace(__IRC_Base64_Encode($sUsername & Chr(0) & $sUsername & Chr(0) & $sPassword), @CRLF, ''))
+	If $bCensorAuthString Then
+		_IRC_SendRaw($iSocket, "AUTHENTICATE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & StringReplace(__IRC_Base64_Encode($sUsername & Chr(0) & $sUsername & Chr(0) & $sPassword), @CRLF, ''), 'AUTHENTICATE ****')
+	Else
+		_IRC_SendRaw($iSocket, "AUTHENTICATE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & StringReplace(__IRC_Base64_Encode($sUsername & Chr(0) & $sUsername & Chr(0) & $sPassword), @CRLF, ''))
+	EndIf
 	If @error Then Return SetError(5, @error, @extended)
 	Local $aMessage = _IRC_WaitForNextMsg($iSocket, True)
 	If @error Then Return SetError(4, @extended, False)
