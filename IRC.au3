@@ -244,7 +244,7 @@ EndFunc
 ; Name ..........: _IRC_FormatMessage
 ; Description ...: Formats a RAW message from to IRC into a neat array ;).
 ; Syntax ........: _IRC_FormatMessage($sMessage)
-; Parameters ....: $sMessage            - The raw $sMessage from the server.
+; Parameters ....: $sMessage            - The raw $sMessage from the server. (@CRLF is automatically deleted if it exists!)
 ; Return values .: Success: Formatted Array, See Remarks for format.
 ;                  Failure: Not gonna happen lol.
 ; Author ........: Damon Harris (TheDcoder)
@@ -260,7 +260,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_FormatMessage($sMessage)
-	$sMessage = StringTrimRight($sMessage, 2) ; Trim the trailing @CRLF
+	$sMessage = StringStripWS($sMessage ,$STR_STRIPTRAILING) ; Trim the trailing whitespace (@CRLF)
 	If Not (StringLeft($sMessage, 1) = $IRC_TRAILING_PARAMETER_INDICATOR) Then
 		$sMessage = ' ' & $sMessage
 	Else
@@ -268,13 +268,13 @@ Func _IRC_FormatMessage($sMessage)
 	EndIf
 	Local $aMessage = StringSplit($sMessage, $IRC_MESSAGE_SEGMENT_SEPARATOR)
 	Local $sLastParameter = ""
-	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, 1, 2)
+	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, -1)
 	Local $iLastParameterSpaces = 0
 	Local $iMessageSpaces = $aMessage[0]
 	If $iLastParameterPos = 0 Then
 		$sLastParameter = $aMessage[$aMessage[0]]
 	Else
-		$sLastParameter = StringRight($sMessage, StringLen($sMessage) - $iLastParameterPos)
+		$sLastParameter = StringTrimLeft($sMessage, $iLastParameterPos)
 		StringReplace($sLastParameter, $IRC_MESSAGE_SEGMENT_SEPARATOR, "", 0, $STR_NOCASESENSEBASIC)
 		$iLastParameterSpaces = @extended
 	EndIf
