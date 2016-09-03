@@ -35,6 +35,7 @@
 ; _IRC_IsChannel
 ; _IRC_JoinChannel
 ; _IRC_Kick
+; _IRC_MakeMessage
 ; _IRC_MakePalette
 ; _IRC_Part
 ; _IRC_Pong
@@ -546,6 +547,36 @@ Func _IRC_Kick($iSocket, $sChannel, $sNick, $sReason = "")
 	_IRC_SendRaw($iSocket, "KICK" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _IRC_MakeMessage
+; Description ...: Generate messages which can be sent to the IRC server.
+; Syntax ........: _IRC_MakeMessage($sCommand, $aParameters[, $iParameters = UBound($aParameters)])
+; Parameters ....: $sCommand            - The $sCommand.
+;                  $aParameters         - Array containing the parameter(s) for the $sCommand. See remarks for the format.
+;                  $iParameters         - [optional] No. of $aParameters. Default is UBound($aParameter).
+; Return values .: Success: The generated $sMessage
+;                  Failure: N/A
+; Author ........: Damon Harris (TheDcoder)
+; Modified ......:
+; Remarks .......: Remarks about $aParameters:
+;                  $aParameters should contain the parameters for the $sCommand. Every element is considered as a parameter, so
+;                  including additional information like the number of elements in the [0] element is NOT allowed.
+;
+;                  If you already know the number of parameters in the $aParameters array, you should pass the number to $iParameters,
+;                  you will get a slight performance boost! ;)
+; Related .......:
+; Link ..........:
+; Example .......: No
+; ===============================================================================================================================
+Func _IRC_MakeMessage($sCommand, $aParameters, $iParameters = UBound($aParameters))
+	Local $sMessage = $sCommand & $IRC_MESSAGE_SEGMENT_SEPARATOR
+	For $iParameter = 0 To $iParameters - 2
+		$sMessage &= $aParameters[$iParameter] & $IRC_MESSAGE_SEGMENT_SEPARATOR
+	Next
+	$sMessage &= $IRC_TRAILING_PARAMETER_INDICATOR & $aParameters[$iParameters - 1]
+	Return $sMessage
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
