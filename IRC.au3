@@ -268,7 +268,7 @@ Func _IRC_FormatMessage($sMessage)
 	EndIf
 	Local $aMessage = StringSplit($sMessage, $IRC_MESSAGE_SEGMENT_SEPARATOR)
 	Local $sLastParameter = ""
-	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, -1)
+	Local $iLastParameterPos = StringInStr($sMessage, $IRC_TRAILING_PARAMETER_INDICATOR, $STR_NOCASESENSEBASIC, 1, StringLen($aMessage[0] > 0 ? $aMessage[1] : ""))
 	Local $iLastParameterSpaces = 0
 	Local $iMessageSpaces = $aMessage[0]
 	If $iLastParameterPos = 0 Then
