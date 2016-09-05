@@ -771,7 +771,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetNick($iSocket, $sNick)
-	_IRC_SendRaw($iSocket, 'NICK' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick)
+	Local $aParameters[1] = [$sNick]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_NICKNAME, $aParameters, 1)
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
