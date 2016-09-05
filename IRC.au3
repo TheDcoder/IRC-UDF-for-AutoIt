@@ -819,7 +819,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetTopic($iSocket, $sChannel, $sTopic)
-	_IRC_SendRaw($iSocket, 'TOPIC' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sTopic)
+	Local $aParameters[2] = [$sChannel, $sTopic]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_TOPIC, $aParameter, 2))
 	If @error Then Return SetError(1, @extended, False)
 EndFunc
 
