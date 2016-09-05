@@ -670,7 +670,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Quit($iSocket, $sReason = "")
-	_IRC_SendRaw($iSocket, 'QUIT' & $IRC_MESSAGE_SEGMENT_SEPARATOR & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
+	$aParameters[1] = [$sReason]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_QUIT, $aParameters, $sReason = "" ? 0 : 1))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
