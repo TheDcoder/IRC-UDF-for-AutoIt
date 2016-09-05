@@ -718,7 +718,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SendNotice($iSocket, $sTarget, $sMessage)
-	_IRC_SendRaw($iSocket, "NOTICE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sTarget & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sMessage)
+	Local $aParameters[2] = [$sTarget, $sMessage]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_NOTICE, $aParameters, 2)
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
