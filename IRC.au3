@@ -522,7 +522,7 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_JoinChannel($iSocket, $sChannel, $sPassword = "")
 	Local $aParameters[2] = [$sChannel, $sPassword]
-	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_JOIN, $aParameters, $sPassword = "" ? 1 : 2)
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_JOIN, $aParameters, $sPassword = "" ? 1 : 2))
 	If @error Then Return SetError(@error, @extended, False)
 	Return True
 EndFunc
@@ -567,7 +567,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Kick($iSocket, $sChannel, $sNick, $sReason = "")
-	$aParameters[3] = [$sChannel, $sNick, $sReason]
+	Local $aParameters[3] = [$sChannel, $sNick, $sReason]
 	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_KICK, $aParameters, $sReason = "" ? 2 : 3))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
@@ -649,7 +649,7 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_Part($iSocket, $sChannel, $sReason = "")
 	Local $aParameters[2] = [$sChannel, $sReason]
-	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_PART, $aParameters, $sReason = "" ? 1 : 2)
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_PART, $aParameters, $sReason = "" ? 1 : 2))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -670,7 +670,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Quit($iSocket, $sReason = "")
-	$aParameters[1] = [$sReason]
+	Local $aParameters[1] = [$sReason]
 	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_QUIT, $aParameters, $sReason = "" ? 0 : 1))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
@@ -696,7 +696,7 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_SendMessage($iSocket, $sTarget, $sMessage)
 	Local $aParameters[2] = [$sTarget, $sMessage]
-	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_MESSAGE, $aParameters, 2)
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_MESSAGE, $aParameters, 2))
 	If @error Then Return SetError(@error, @extended, False)
 	Return True
 EndFunc
@@ -719,7 +719,7 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_SendNotice($iSocket, $sTarget, $sMessage)
 	Local $aParameters[2] = [$sTarget, $sMessage]
-	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_NOTICE, $aParameters, 2)
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_NOTICE, $aParameters, 2))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -772,7 +772,7 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_SetNick($iSocket, $sNick)
 	Local $aParameters[1] = [$sNick]
-	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_NICKNAME, $aParameters, 1)
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_NICKNAME, $aParameters, 1))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
@@ -820,7 +820,7 @@ EndFunc
 ; ===============================================================================================================================
 Func _IRC_SetTopic($iSocket, $sChannel, $sTopic)
 	Local $aParameters[2] = [$sChannel, $sTopic]
-	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_TOPIC, $aParameter, 2))
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_TOPIC, $aParameters, 2))
 	If @error Then Return SetError(1, @extended, False)
 EndFunc
 
@@ -843,7 +843,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetUser($iSocket, $sUsername, $sRealname, $sMode = '0', $sUnused = '*')
-	$aParameters[4] = [$sUsername, $sMode, $sUnused, $sRealname]
+	Local $aParameters[4] = [$sUsername, $sMode, $sUnused, $sRealname]
 	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_USER, $aParameters, 4))
 	If @error Then Return SetError(1, @extended, False)
 EndFunc
