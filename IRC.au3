@@ -843,7 +843,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetUser($iSocket, $sUsername, $sRealname, $sMode = '0', $sUnused = '*')
-	_IRC_SendRaw($iSocket, 'USER' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sUsername & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sMode & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sUnused & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sRealname)
+	$aParameters[4] = [$sUsername, $sMode, $sUnused, $sRealname]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_USER, $aParameters, 4))
 	If @error Then Return SetError(1, @extended, False)
 EndFunc
 
