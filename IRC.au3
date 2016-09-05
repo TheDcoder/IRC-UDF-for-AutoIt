@@ -521,8 +521,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_JoinChannel($iSocket, $sChannel, $sPassword = "")
-	Local $sRawMessage = "JOIN " & $sChannel & (($sPassword = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sPassword))
-	_IRC_SendRaw($iSocket, $sRawMessage)
+	Local $aParameters[2] = [$sChannel, $sPassword]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_JOIN, $aParameters, $sPassword = "" ? 1 : 2)
 	If @error Then Return SetError(@error, @extended, False)
 	Return True
 EndFunc
