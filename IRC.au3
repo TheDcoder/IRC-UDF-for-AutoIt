@@ -185,7 +185,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_CapRequire($iSocket, $sCapability)
-	_IRC_SendRaw($iSocket, "CAP" & $IRC_MESSAGE_SEGMENT_SEPARATOR & "REQ" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sCapability)
+	Local $aParameters[2] = ["REQ", $sCapability]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage("CAP", $aParameters, 2))
 	If @error Then Return SetError(1, @extended, False)
 	Local $aMessage
 	Do
