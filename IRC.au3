@@ -400,7 +400,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Invite($iSocket, $sNick, $sChannel)
-	_IRC_SendRaw($iSocket, "INVITE" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel)
+	Local $aParameters[2] = [$sNick, $sChannel]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_INVITE, $aParameters, 2))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
