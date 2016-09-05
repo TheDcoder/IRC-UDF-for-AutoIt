@@ -211,7 +211,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_CapEnd($iSocket)
-	_IRC_SendRaw($iSocket, "CAP" & $IRC_MESSAGE_SEGMENT_SEPARATOR & "END")
+	Local $aParameters[1] = ["END"]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage("CAP", $aParameters, 1))
 	If @error Then SetError(1, @extended, False)
 	Return True
 EndFunc
