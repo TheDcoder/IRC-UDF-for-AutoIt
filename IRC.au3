@@ -648,7 +648,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Part($iSocket, $sChannel, $sReason = "")
-	_IRC_SendRaw($iSocket, "PART" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
+	Local $aParameters[2] = [$sChannel, $sReason]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_PART, $aParameters, $sReason = "" ? 1 : 2)
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
