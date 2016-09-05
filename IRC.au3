@@ -567,7 +567,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Kick($iSocket, $sChannel, $sNick, $sReason = "")
-	_IRC_SendRaw($iSocket, "KICK" & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sChannel & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & (($sReason = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sReason)))
+	$aParameters[3] = [$sChannel, $sNick, $sReason]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_KICK, $aParameters, $sReason = "" ? 2 : 3))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
