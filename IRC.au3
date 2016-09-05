@@ -796,7 +796,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_SetMode($iSocket, $sNick, $sOperation, $sModes, $sParameters = "")
-	_IRC_SendRaw($iSocket, 'MODE' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sNick & $IRC_MESSAGE_SEGMENT_SEPARATOR & $sOperation & $sModes & (($sParameters = "") ? ("") : ($IRC_MESSAGE_SEGMENT_SEPARATOR & $sParameters)))
+	Local $aParameters[3] = [$sNick, $sOperation & $sModes, $sParameters]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_MODE, $aParameters, $sParameters = "" ? 2 : 3))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
