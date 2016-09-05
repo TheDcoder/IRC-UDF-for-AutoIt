@@ -543,7 +543,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _IRC_Pong($iSocket, $sServer)
-	_IRC_SendRaw($iSocket, 'PONG' & $IRC_MESSAGE_SEGMENT_SEPARATOR & $IRC_TRAILING_PARAMETER_INDICATOR & $sServer)
+	Local $aParameters[1] = [$sServer]
+	_IRC_SendRaw($iSocket, _IRC_MakeMessage($IRC_COMMAND_PONG, $aParameters, 1))
 	If @error Then Return SetError(1, @extended, False)
 	Return True
 EndFunc
